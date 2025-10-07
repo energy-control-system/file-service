@@ -1,0 +1,48 @@
+package handler
+
+import (
+	"file-service/service/file"
+	"fmt"
+	"net/http"
+
+	"github.com/sunshineOfficial/golib/gohttp/gorouter"
+)
+
+func UploadFile(s *file.Service) gorouter.Handler {
+	return func(c gorouter.Context) error {
+		files, err := c.FormFiles("file")
+		if err != nil {
+			return fmt.Errorf("parse form files: %w", err)
+		}
+		if len(files) != 1 {
+			return fmt.Errorf("parse form files: got %d files, expected 1", len(files))
+		}
+
+		f, err := s.Upload(c.Ctx(), c.Log(), files[0])
+		if err != nil {
+			return fmt.Errorf("upload file: %w", err)
+		}
+
+		return c.WriteJson(http.StatusOK, f)
+	}
+}
+
+type fileIDVars struct {
+	ID int `path:"id"`
+}
+
+func GetFileByID(s *file.Service) gorouter.Handler {
+	return func(c gorouter.Context) error {
+		var vars fileIDVars
+		if err := c.Vars(&vars); err != nil {
+			return fmt.Errorf("get file id: %w", err)
+		}
+
+		f, err := s.GetByID(c.Ctx(), vars.ID)
+		if err != nil {
+			return fmt.Errorf("get file by id: %w", err)
+		}
+
+		return c.WriteJson(http.StatusOK, f)
+	}
+}
