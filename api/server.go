@@ -35,8 +35,9 @@ func (s *ServerBuilder) AddDebug() {
 }
 
 func (s *ServerBuilder) AddFiles(service *file.Service) {
-	s.router.HandlePost("", handler.UploadFile(service))
-	s.router.HandleGet("/{id}", handler.GetFileByID(service))
+	r := s.router.SubRouter("/files")
+	r.HandlePost("", handler.UploadFile(service))
+	r.HandleGet("/{id}", handler.GetFileByID(service))
 }
 
 func (s *ServerBuilder) Build() goserver.Server {
