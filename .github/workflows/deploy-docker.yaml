@@ -6,7 +6,7 @@ on:
 
 env:
   CONTAINER_NAME: file-service
-  CONTAINER_PORT: 8080
+  CONTAINER_PORT: 80
 
 jobs:
   deploy:

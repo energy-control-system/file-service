@@ -17,7 +17,7 @@ RUN go build -o out/app
 
 FROM ubuntu:24.04
 
-EXPOSE 8080
+EXPOSE 80
 
 WORKDIR /app
 
