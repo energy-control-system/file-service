@@ -40,8 +40,9 @@ jobs:
         env:
           MINIO_USER: ${{ secrets.MINIO_USER }}
           MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          docker run -d --name $CONTAINER_NAME-${{ env.SHORT_SHA }} --network=backend -e ENV=prod -e MINIO_USER=$MINIO_USER -e MINIO_PASSWORD=$MINIO_PASSWORD -p $CONTAINER_PORT:$CONTAINER_PORT $CONTAINER_NAME:${{ env.SHORT_SHA }}
+          docker run -d --name $CONTAINER_NAME-${{ env.SHORT_SHA }} --network=backend -e ENV=prod -e MINIO_USER=$MINIO_USER -e MINIO_PASSWORD=$MINIO_PASSWORD -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -p $CONTAINER_PORT:$CONTAINER_PORT $CONTAINER_NAME:${{ env.SHORT_SHA }}
 
       - name: Remove old images of the same container (keep current)
         run: |

@@ -8,6 +8,6 @@
       "use_ssl": false,
       "host": "http://localhost/storage"
     },
-    "postgres": ""
+    "postgres": "postgres://postgres:%s@postgres:5432/file_service?sslmode=disable"
   }
 }

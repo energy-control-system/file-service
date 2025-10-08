@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sunshineOfficial/golib/config"
@@ -23,7 +24,7 @@ func Get(log golog.Logger) (Settings, error) {
 
 	settings.Databases.Minio.User = os.Getenv("MINIO_USER")
 	settings.Databases.Minio.Password = os.Getenv("MINIO_PASSWORD")
-	settings.Databases.Postgres = os.Getenv("POSTGRES_CONNECTION_URI")
+	settings.Databases.Postgres = fmt.Sprintf(settings.Databases.Postgres, os.Getenv("POSTGRES_PASSWORD"))
 
 	return settings, nil
 }
