@@ -28,10 +28,7 @@ func (p *Postgres) Add(ctx context.Context, f File) (id int, err error) {
 		return 0, fmt.Errorf("p.db.NamedQueryContext: %w", err)
 	}
 	defer func() {
-		rowsErr := rows.Close()
-		if rowsErr != nil {
-			err = errors.Join(err, rowsErr)
-		}
+		err = errors.Join(err, rows.Close())
 	}()
 
 	if !rows.Next() {
