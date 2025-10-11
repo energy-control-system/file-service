@@ -123,6 +123,6 @@ func (a *App) Stop(_ context.Context) {
 
 	err := a.postgres.Close()
 	if err != nil {
-		a.log.Error("failed to close postgres connection")
+		a.log.Errorf("failed to close postgres connection: %v", err)
 	}
 }
