@@ -10,7 +10,7 @@ import (
 
 func UploadFile(s *file.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
-		files, err := c.FormFiles("file")
+		files, err := c.FormFiles("File")
 		if err != nil {
 			return fmt.Errorf("parse form files: %w", err)
 		}
