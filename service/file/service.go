@@ -1,8 +1,6 @@
 package file
 
 import (
-	"file-service/database/file"
-	"file-service/database/object"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -12,52 +10,43 @@ import (
 )
 
 type Service struct {
-	bucketStorages map[Bucket]*object.Minio
-	fileRepository *file.Postgres
+	bucketStorages map[Bucket]Storage
+	repository     Repository
 }
 
-func NewService(bucketStorages map[Bucket]*object.Minio, fileRepository *file.Postgres) *Service {
+func NewService(bucketStorages map[Bucket]Storage, repository Repository) *Service {
 	return &Service{
 		bucketStorages: bucketStorages,
-		fileRepository: fileRepository,
+		repository:     repository,
 	}
 }
 
 func (s *Service) Upload(ctx goctx.Context, log golog.Logger, fileHeader *multipart.FileHeader) (File, error) {
-	result := File{
-		FileName: fileHeader.Filename,
-		FileSize: fileHeader.Size,
-		Bucket:   bucketFromFileName(fileHeader.Filename),
-	}
+	bucket := bucketFromFileName(fileHeader.Filename)
 
-	storage, ok := s.bucketStorages[result.Bucket]
+	storage, ok := s.bucketStorages[bucket]
 	if !ok {
-		return File{}, fmt.Errorf("bucket %s does not exist", result.Bucket)
+		return File{}, fmt.Errorf("bucket %s does not exist", bucket)
 	}
 
 	payload, err := fileHeader.Open()
 	if err != nil {
-		return File{}, fmt.Errorf("open file %s failed: %w", result.FileName, err)
+		return File{}, fmt.Errorf("open file %s failed: %w", fileHeader.Filename, err)
 	}
 	defer func() {
 		if closeErr := payload.Close(); closeErr != nil {
-			log.Errorf("close file %s failed: %v", result.FileName, closeErr)
+			log.Errorf("close file %s failed: %v", fileHeader.Filename, closeErr)
 		}
 	}()
 
-	result.URL, err = storage.Add(ctx, result.FileName, payload, result.FileSize)
+	url, err := storage.Add(ctx, fileHeader.Filename, payload, fileHeader.Size)
 	if err != nil {
-		return File{}, fmt.Errorf("upload file %s failed: %w", result.FileName, err)
+		return File{}, fmt.Errorf("upload file %s failed: %w", fileHeader.Filename, err)
 	}
 
-	result.ID, err = s.fileRepository.Add(ctx, file.File{
-		FileName: result.FileName,
-		FileSize: result.FileSize,
-		Bucket:   string(result.Bucket),
-		URL:      result.URL,
-	})
+	result, err := s.repository.Add(ctx, fileHeader, bucket, url)
 	if err != nil {
-		return File{}, fmt.Errorf("save file %s failed: %w", result.FileName, err)
+		return File{}, fmt.Errorf("save file %s failed: %w", fileHeader.Filename, err)
 	}
 
 	return result, nil
@@ -73,16 +62,10 @@ func bucketFromFileName(name string) Bucket {
 }
 
 func (s *Service) GetByID(ctx goctx.Context, id int) (File, error) {
-	f, err := s.fileRepository.GetByID(ctx, id)
+	f, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return File{}, fmt.Errorf("get file by id %d failed: %w", id, err)
 	}
 
-	return File{
-		ID:       f.ID,
-		FileName: f.FileName,
-		FileSize: f.FileSize,
-		Bucket:   Bucket(f.Bucket),
-		URL:      f.URL,
-	}, nil
+	return f, nil
 }

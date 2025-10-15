@@ -1,3 +1,3 @@
 insert into storage_files (file_name, file_size, bucket, url)
-values (:file_name, :file_size, :bucket, :url)
-returning id;
+values ($1, $2, $3, $4)
+returning id, file_name, file_size, url;

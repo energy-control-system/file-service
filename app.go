@@ -94,12 +94,12 @@ func (a *App) InitServices() error {
 		return fmt.Errorf("init image storage: %w", err)
 	}
 
-	bucketStorages := map[file.Bucket]*object.Minio{
+	bucketStorages := map[file.Bucket]file.Storage{
 		file.BucketDocuments: documentStorage,
 		file.BucketImages:    imageStorage,
 	}
 
-	fileRepository := dbfile.NewPostgres(a.postgres)
+	fileRepository := dbfile.NewRepository(a.postgres)
 
 	a.fileService = file.NewService(bucketStorages, fileRepository)
 

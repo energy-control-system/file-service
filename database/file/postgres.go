@@ -3,18 +3,19 @@ package file
 import (
 	"context"
 	_ "embed"
-	"errors"
+	"file-service/service/file"
 	"fmt"
+	"mime/multipart"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type Postgres struct {
+type Repository struct {
 	db *sqlx.DB
 }
 
-func NewPostgres(db *sqlx.DB) *Postgres {
-	return &Postgres{
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{
 		db: db,
 	}
 }
@@ -22,35 +23,25 @@ func NewPostgres(db *sqlx.DB) *Postgres {
 //go:embed sql/add.sql
 var addSQL string
 
-func (p *Postgres) Add(ctx context.Context, f File) (id int, err error) {
-	rows, err := p.db.NamedQueryContext(ctx, addSQL, f)
+func (r *Repository) Add(ctx context.Context, fileHeader *multipart.FileHeader, bucket file.Bucket, url string) (file.File, error) {
+	var f File
+	err := r.db.GetContext(ctx, &f, addSQL, fileHeader.Filename, fileHeader.Size, bucket, url)
 	if err != nil {
-		return 0, fmt.Errorf("p.db.NamedQueryContext: %w", err)
-	}
-	defer func() {
-		err = errors.Join(err, rows.Close())
-	}()
-
-	if !rows.Next() {
-		return 0, errors.New("rows.Next == false")
+		return file.File{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
 
-	err = rows.Scan(&id)
-	if err != nil {
-		return 0, fmt.Errorf("rows.Scan: %w", err)
-	}
-
-	return id, err
+	return MapFromDB(f), nil
 }
 
 //go:embed sql/get_by_id.sql
 var getByIDSQL string
 
-func (p *Postgres) GetByID(ctx context.Context, id int) (f File, err error) {
-	err = p.db.GetContext(ctx, &f, getByIDSQL, id)
+func (r *Repository) GetByID(ctx context.Context, id int) (file.File, error) {
+	var f File
+	err := r.db.GetContext(ctx, &f, getByIDSQL, id)
 	if err != nil {
-		return File{}, fmt.Errorf("p.db.GetContext: %w", err)
+		return file.File{}, fmt.Errorf("r.db.GetContext: %w", err)
 	}
 
-	return f, nil
+	return MapFromDB(f), nil
 }
