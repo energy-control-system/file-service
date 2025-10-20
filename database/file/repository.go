@@ -45,3 +45,16 @@ func (r *Repository) GetByID(ctx context.Context, id int) (file.File, error) {
 
 	return MapFromDB(f), nil
 }
+
+//go:embed sql/get_by_ids.sql
+var getByIDsSQL string
+
+func (r *Repository) GetByIDs(ctx context.Context, ids []int) ([]file.File, error) {
+	var files []File
+	err := r.db.SelectContext(ctx, &files, getByIDsSQL, ids)
+	if err != nil {
+		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
+	}
+
+	return MapSliceFromDB(files), nil
+}

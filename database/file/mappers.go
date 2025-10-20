@@ -11,3 +11,12 @@ func MapFromDB(f File) file.File {
 		URL:      f.URL,
 	}
 }
+
+func MapSliceFromDB(files []File) []file.File {
+	result := make([]file.File, 0, len(files))
+	for _, f := range files {
+		result = append(result, MapFromDB(f))
+	}
+
+	return result
+}

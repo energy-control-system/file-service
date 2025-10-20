@@ -69,3 +69,12 @@ func (s *Service) GetByID(ctx goctx.Context, id int) (File, error) {
 
 	return f, nil
 }
+
+func (s *Service) GetByIDs(ctx goctx.Context, ids []int) ([]File, error) {
+	files, err := s.repository.GetByIDs(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("get files by ids from db: %w", err)
+	}
+
+	return files, nil
+}
