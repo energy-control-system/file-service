@@ -1,0 +1,112 @@
+@startuml file-service-class-diagram
+
+skinparam monochrome true
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam classFontSize 10
+skinparam defaultFontSize 9
+skinparam packageFontSize 10
+
+left to right direction
+
+title Диаграмма классов File Service
+
+package "main" {
+    class App {
+        - settings: Settings
+        - fileService: *Service
+        + InitDatabases(): error
+        + InitServices(): error
+        + Start()
+        + Stop()
+    }
+}
+
+package "api" {
+    class ServerBuilder {
+        - router: *Router
+        + AddFiles(service)
+        + Build(): Server
+    }
+
+    class FileHandler {
+        + UploadFile(): Handler
+        + GetFileByID(): Handler
+        + GetFilesByIDs(): Handler
+    }
+}
+
+package "service" {
+    class Service {
+        - bucketStorages: map[Bucket]Storage
+        - repository: Repository
+        + Upload(): (File, error)
+        + GetByID(): (File, error)
+        + GetByIDs(): ([]File, error)
+    }
+
+    class File {
+        + ID: int
+        + FileName: string
+        + FileSize: int64
+        + Bucket: Bucket
+        + URL: string
+    }
+
+    enum Bucket {
+        images
+        documents
+    }
+
+    interface Storage {
+        + Add(): (string, error)
+    }
+
+    interface Repository {
+        + Add(): (File, error)
+        + GetByID(): (File, error)
+        + GetByIDs(): ([]File, error)
+    }
+}
+
+package "database" {
+    class FileRepository {
+        - db: *sqlx.DB
+        + Add(): (File, error)
+        + GetByID(): (File, error)
+        + GetByIDs(): ([]File, error)
+    }
+
+    class MinioStorage {
+        - mc: *minio.Client
+        - bucket: string
+        + Add(): (string, error)
+    }
+}
+
+package "config" {
+    class Settings {
+        + Port: int
+        + Databases: Databases
+    }
+}
+
+App --> ServerBuilder
+App --> Service
+App *-- Settings
+
+ServerBuilder --> FileHandler
+
+FileHandler --> Service
+
+Service --> Storage
+Service --> Repository
+Service --> File
+Service --> Bucket
+
+FileRepository ..|> Repository
+MinioStorage ..|> Storage
+
+File --> Bucket
+
+@enduml
