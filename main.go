@@ -8,8 +8,14 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/sunshineOfficial/golib/golog"
 	"github.com/sunshineOfficial/golib/goos"
+
+	_ "file-service/docs"
 )
 
+// @title File Service API
+// @version 1.0
+// @description API for uploading files and reading file metadata.
+// @BasePath /api/file-service
 func main() {
 	configureDecimal()
 
