@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 type Repository struct {
@@ -49,9 +50,9 @@ func (r *Repository) GetByID(ctx context.Context, id int) (file.File, error) {
 //go:embed sql/get_by_ids.sql
 var getByIDsSQL string
 
-func (r *Repository) GetByIDs(ctx context.Context, ids []int) ([]file.File, error) {
+func (r *Repository) GetByIDs(ctx context.Context, ids []int, page pagination.Pagination) ([]file.File, error) {
 	var files []File
-	err := r.db.SelectContext(ctx, &files, getByIDsSQL, ids)
+	err := r.db.SelectContext(ctx, &files, getByIDsSQL, ids, page.LimitArg(), page.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("r.db.SelectContext: %w", err)
 	}

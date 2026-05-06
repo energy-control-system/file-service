@@ -7,6 +7,7 @@ import (
 
 	"github.com/sunshineOfficial/golib/goctx"
 	"github.com/sunshineOfficial/golib/golog"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 type Service struct {
@@ -70,8 +71,12 @@ func (s *Service) GetByID(ctx goctx.Context, id int) (File, error) {
 	return f, nil
 }
 
-func (s *Service) GetByIDs(ctx goctx.Context, ids []int) ([]File, error) {
-	files, err := s.repository.GetByIDs(ctx, ids)
+func (s *Service) GetByIDs(ctx goctx.Context, ids []int, page pagination.Pagination) ([]File, error) {
+	if err := page.Validate(); err != nil {
+		return nil, fmt.Errorf("validate pagination: %w", err)
+	}
+
+	files, err := s.repository.GetByIDs(ctx, ids, page)
 	if err != nil {
 		return nil, fmt.Errorf("get files by ids from db: %w", err)
 	}

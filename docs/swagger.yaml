@@ -51,6 +51,14 @@ paths:
         name: id
         required: true
         type: array
+      - description: Maximum number of items to return; 0 means no limit
+        in: query
+        name: limit
+        type: integer
+      - description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
       produces:
       - application/json
       responses:

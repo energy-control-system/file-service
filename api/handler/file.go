@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
+	"github.com/sunshineOfficial/golib/pagination"
 )
 
 // UploadFile godoc
@@ -70,7 +71,9 @@ func GetFileByID(s *file.Service) gorouter.Handler {
 }
 
 type fileIDsVars struct {
-	IDs []int `query:"id"`
+	IDs    []int `query:"id"`
+	Limit  int   `query:"limit"`
+	Offset int   `query:"offset"`
 }
 
 // GetFilesByIDs godoc
@@ -79,6 +82,8 @@ type fileIDsVars struct {
 // @Tags files
 // @Produce json
 // @Param id query []int true "File IDs" collectionFormat(multi)
+// @Param limit query int false "Maximum number of items to return; 0 means no limit"
+// @Param offset query int false "Number of items to skip"
 // @Success 200 {array} file.File
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
@@ -90,7 +95,7 @@ func GetFilesByIDs(s *file.Service) gorouter.Handler {
 			return fmt.Errorf("get files ids: %w", err)
 		}
 
-		response, err := s.GetByIDs(c.Ctx(), vars.IDs)
+		response, err := s.GetByIDs(c.Ctx(), vars.IDs, pagination.Pagination{Limit: vars.Limit, Offset: vars.Offset})
 		if err != nil {
 			return fmt.Errorf("get files by ids: %w", err)
 		}

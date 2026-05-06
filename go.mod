@@ -6,7 +6,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/shopspring/decimal v1.4.0
-	github.com/sunshineOfficial/golib v0.0.17
+	github.com/sunshineOfficial/golib v0.0.20
+	github.com/swaggo/swag v1.16.6
 )
 
 require (
@@ -74,7 +75,6 @@ require (
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/swaggo/files/v2 v2.0.2 // indirect
 	github.com/swaggo/http-swagger/v2 v2.0.2 // indirect
-	github.com/swaggo/swag v1.16.6 // indirect
 	github.com/tinylib/msgp v1.3.0 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsqlx v0.3.2 // indirect
