@@ -1,109 +1,126 @@
-basePath: /api/file-service
-definitions:
-  file-service_service_file.File:
-    properties:
-      Bucket:
-        $ref: '#/definitions/file.Bucket'
-      FileName:
-        type: string
-      FileSize:
-        type: integer
-      ID:
-        type: integer
-      URL:
-        type: string
-    type: object
-  file.Bucket:
-    enum:
-    - images
-    - documents
-    type: string
-    x-enum-varnames:
-    - BucketImages
-    - BucketDocuments
-  gorouter.ErrorInfo:
-    properties:
-      code:
-        type: string
-      message:
-        type: string
-    type: object
-  gorouter.ErrorResponse:
-    properties:
-      error:
-        $ref: '#/definitions/gorouter.ErrorInfo'
-    type: object
+components:
+  schemas:
+    file-service_service_file.Bucket:
+      enum:
+      - images
+      - documents
+      type: string
+      x-enum-varnames:
+      - BucketImages
+      - BucketDocuments
+    file-service_service_file.File:
+      properties:
+        Bucket:
+          $ref: '#/components/schemas/file-service_service_file.Bucket'
+        FileName:
+          type: string
+        FileSize:
+          type: integer
+        ID:
+          type: integer
+        URL:
+          type: string
+      type: object
+    gorouter.ErrorInfo:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      type: object
+    gorouter.ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/gorouter.ErrorInfo'
+      type: object
+externalDocs:
+  description: ""
+  url: ""
 info:
-  contact: {}
   description: API for uploading files and reading file metadata.
   title: File Service API
   version: "1.0"
+openapi: 3.1.0
 paths:
   /files:
     get:
       description: Returns metadata for several files.
       parameters:
-      - collectionFormat: multi
-        description: File IDs
+      - description: File IDs
         in: query
-        items:
-          type: integer
         name: id
         required: true
-        type: array
+        schema:
+          items:
+            type: integer
+          type: array
+        style: form
       - description: Maximum number of items to return; 0 means no limit
         in: query
         name: limit
-        type: integer
+        schema:
+          type: integer
       - description: Number of items to skip
         in: query
         name: offset
-        type: integer
-      produces:
-      - application/json
+        schema:
+          type: integer
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/file-service_service_file.File'
+                type: array
           description: OK
-          schema:
-            items:
-              $ref: '#/definitions/file-service_service_file.File'
-            type: array
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
       summary: Get files by IDs
       tags:
       - files
     post:
-      consumes:
-      - multipart/form-data
       description: Uploads one file to object storage and stores its metadata.
-      parameters:
-      - description: File to upload
-        in: formData
-        name: File
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              title: File
+              type: file
+          multipart/form-data:
+            schema:
+              type: object
+        description: File to upload
         required: true
-        type: file
-      produces:
-      - application/json
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file-service_service_file.File'
           description: OK
-          schema:
-            $ref: '#/definitions/file-service_service_file.File'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
       summary: Upload file
       tags:
       - files
@@ -115,27 +132,35 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
-      produces:
-      - application/json
+        schema:
+          type: integer
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file-service_service_file.File'
           description: OK
-          schema:
-            $ref: '#/definitions/file-service_service_file.File'
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Bad Request
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Not Found
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
         "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gorouter.ErrorResponse'
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gorouter.ErrorResponse'
       summary: Get file by ID
       tags:
       - files
-swagger: "2.0"
+servers:
+- url: /api/file-service
