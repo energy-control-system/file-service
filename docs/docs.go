@@ -8,21 +8,10 @@ const docTemplate = `{
     "schemes": {{ marshal .Schemes }},
     "components": {
         "schemas": {
-            "file-service_service_file.Bucket": {
-                "enum": [
-                    "images",
-                    "documents"
-                ],
-                "type": "string",
-                "x-enum-varnames": [
-                    "BucketImages",
-                    "BucketDocuments"
-                ]
-            },
             "file-service_service_file.File": {
                 "properties": {
                     "Bucket": {
-                        "$ref": "#/components/schemas/file-service_service_file.Bucket"
+                        "$ref": "#/components/schemas/file.Bucket"
                     },
                     "FileName": {
                         "type": "string"
@@ -38,6 +27,17 @@ const docTemplate = `{
                     }
                 },
                 "type": "object"
+            },
+            "file.Bucket": {
+                "enum": [
+                    "images",
+                    "documents"
+                ],
+                "type": "string",
+                "x-enum-varnames": [
+                    "BucketImages",
+                    "BucketDocuments"
+                ]
             },
             "gorouter.ErrorInfo": {
                 "properties": {
