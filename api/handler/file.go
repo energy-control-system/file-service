@@ -4,6 +4,8 @@ import (
 	"file-service/service/file"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/sunshineOfficial/golib/gohttp/gorouter"
 	"github.com/sunshineOfficial/golib/pagination"
@@ -35,6 +37,8 @@ func UploadFile(s *file.Service) gorouter.Handler {
 			return fmt.Errorf("upload file: %w", err)
 		}
 
+		response = withPublicStorageURL(c.Request(), response)
+
 		return c.WriteJson(http.StatusOK, response)
 	}
 }
@@ -65,6 +69,8 @@ func GetFileByID(s *file.Service) gorouter.Handler {
 		if err != nil {
 			return fmt.Errorf("get file by id: %w", err)
 		}
+
+		response = withPublicStorageURL(c.Request(), response)
 
 		return c.WriteJson(http.StatusOK, response)
 	}
@@ -100,6 +106,51 @@ func GetFilesByIDs(s *file.Service) gorouter.Handler {
 			return fmt.Errorf("get files by ids: %w", err)
 		}
 
+		response = withPublicStorageURLs(c.Request(), response)
+
 		return c.WriteJson(http.StatusOK, response)
 	}
+}
+
+func withPublicStorageURLs(r *http.Request, files []file.File) []file.File {
+	result := make([]file.File, 0, len(files))
+	for _, f := range files {
+		result = append(result, withPublicStorageURL(r, f))
+	}
+
+	return result
+}
+
+func withPublicStorageURL(r *http.Request, f file.File) file.File {
+	parsed, err := url.Parse(f.URL)
+	if err != nil || parsed.Path == "" {
+		return f
+	}
+
+	host := firstHeaderValue(r.Header.Get("X-Forwarded-Host"))
+	if host == "" {
+		host = r.Host
+	}
+	if host == "" {
+		return f
+	}
+
+	scheme := firstHeaderValue(r.Header.Get("X-Forwarded-Proto"))
+	if scheme == "" {
+		scheme = "http"
+		if r.TLS != nil {
+			scheme = "https"
+		}
+	}
+
+	parsed.Scheme = scheme
+	parsed.Host = host
+	f.URL = parsed.String()
+
+	return f
+}
+
+func firstHeaderValue(value string) string {
+	value, _, _ = strings.Cut(value, ",")
+	return strings.TrimSpace(value)
 }
