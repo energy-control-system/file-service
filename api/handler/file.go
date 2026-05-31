@@ -57,6 +57,7 @@ type fileIDVars struct {
 // @Failure 400 {object} gorouter.ErrorResponse
 // @Failure 404 {object} gorouter.ErrorResponse
 // @Failure 500 {object} gorouter.ErrorResponse
+// @Security bearer
 // @Router /files/{id} [get]
 func GetFileByID(s *file.Service) gorouter.Handler {
 	return func(c gorouter.Context) error {
