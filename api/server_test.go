@@ -9,31 +9,31 @@ import (
 	"github.com/sunshineOfficial/golib/golog"
 )
 
-func TestFileAuthorizationPolicy(t *testing.T) {
+func TestFileRoutesAllowUnauthenticatedRequests(t *testing.T) {
 	builder := NewServerBuilder(t.Context(), golog.NewLogger("test"), config.Settings{
 		Port: 80,
 	})
 	builder.AddFiles(nil)
 
-	t.Run("metadata by id requires authorization", func(t *testing.T) {
-		response := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodGet, "/files/1", nil)
+	routes := []struct {
+		method string
+		path   string
+	}{
+		{method: http.MethodPost, path: "/files"},
+		{method: http.MethodGet, path: "/files/1"},
+		{method: http.MethodGet, path: "/files?id=1"},
+	}
 
-		builder.router.ServeHTTP(response, request)
+	for _, route := range routes {
+		t.Run(route.method+" "+route.path, func(t *testing.T) {
+			response := httptest.NewRecorder()
+			request := httptest.NewRequest(route.method, route.path, nil)
 
-		if response.Code != http.StatusUnauthorized {
-			t.Fatalf("status = %d, want %d", response.Code, http.StatusUnauthorized)
-		}
-	})
+			builder.router.ServeHTTP(response, request)
 
-	t.Run("metadata list allows internal calls without authorization", func(t *testing.T) {
-		response := httptest.NewRecorder()
-		request := httptest.NewRequest(http.MethodGet, "/files?id=1", nil)
-
-		builder.router.ServeHTTP(response, request)
-
-		if response.Code == http.StatusUnauthorized {
-			t.Fatalf("status = %d, route must stay open for internal service calls", response.Code)
-		}
-	})
+			if response.Code == http.StatusUnauthorized {
+				t.Fatalf("status = %d, route must be open without authorization", response.Code)
+			}
+		})
+	}
 }
