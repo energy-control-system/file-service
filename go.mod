@@ -6,7 +6,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/minio/minio-go/v7 v7.1.0
 	github.com/shopspring/decimal v1.4.0
-	github.com/sunshineOfficial/golib v0.0.24
+	github.com/sunshineOfficial/golib v0.0.25
 	github.com/swaggo/swag/v2 v2.0.0-rc5
 )
 
